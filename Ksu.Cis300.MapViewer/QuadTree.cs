@@ -110,9 +110,24 @@ namespace Ksu.Cis300.MapViewer
         {
             if(height == 0)
             {
-                segments = new List<StreetSegment>(null);
+                _streets = segments;
             } else
             {
+                float x = (area.Width / 2) + area.Left;
+                float y = (area.Height / 2) - area.Top; //change to -area.Top later if this doesnt work.
+                List<StreetSegment> north = null;
+                List<StreetSegment> south = null;
+                List<StreetSegment> nw = null;
+                List<StreetSegment> sw = null;
+                List<StreetSegment> se = null;
+                List<StreetSegment> ne = null;
+                List<StreetSegment> all = null;
+                SplitNorthSouth(segments, y, north, south);
+                SplitEastWest(north, x, ne, nw);
+                SplitEastWest(south, x, se, sw);
+                height = height - 1;
+                _southeastChild = new QuadTree(se, new RectangleF(area.Left, area.Top, area.Width, area.Height) , height);
+                _southwestChild = new QuadTree;
 
             }
         }

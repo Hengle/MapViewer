@@ -59,9 +59,9 @@ namespace Ksu.Cis300.MapViewer
             _pen = new Pen(c, w);
         }
 
-        public void Draw(Graphics g)
+        public void Draw(Graphics g, int sf)
         {
-            g.DrawLine(_pen, _start.X, _start.Y, _end.X, _end.Y);
+            g.DrawLine(_pen, _start.X*sf, _start.Y*sf, _end.X*sf, _end.Y*sf);
         }
     }
 }
