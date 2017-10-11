@@ -19,6 +19,13 @@ namespace Ksu.Cis300.MapViewer
         public bool canZoomIn;
         public bool canZoomOut;
 
+        /// <summary>
+        /// Constructor that creates a map. Essentially, as long as the streets are inside the bounds porvided, it
+        /// will create a new quadtree and adjust scale factor and size.
+        /// </summary>
+        /// <param name="streets">List of streets being added to the map if they are in range.</param>
+        /// <param name="bounds">The range the streets must be in to be shown.</param>
+        /// <param name="sf">The scale factor.</param>
         public Map(List<StreetSegment> streets, RectangleF bounds, int sf)
         {
             int count = 0;
@@ -42,6 +49,12 @@ namespace Ksu.Cis300.MapViewer
             
         }
 
+        /// <summary>
+        /// Checks to see whether the point is in range.
+        /// </summary>
+        /// <param name="point">The point you're checkig.</param>
+        /// <param name="area">Area the point must be inside.</param>
+        /// <returns></returns>
         private static bool isWithinBounds(PointF point, RectangleF area)
         {
             if(point.X >= area.Left && point.X <= area.Right && point.Y <= area.Top && point.Y >= area.Bottom)
@@ -51,6 +64,9 @@ namespace Ksu.Cis300.MapViewer
             return false;
         }
 
+        /// <summary>
+        /// Zooms in if canZoomIn is true. If not, nothing happens.
+        /// </summary>
         public void ZoomIn()
         {
             if (canZoomIn)
@@ -62,6 +78,9 @@ namespace Ksu.Cis300.MapViewer
             }
         }
 
+        /// <summary>
+        /// Zooms out if canZoomOut is true. If not, nothing happens.
+        /// </summary>
         public void ZoomOut()
         {
             if (canZoomOut)
@@ -73,6 +92,10 @@ namespace Ksu.Cis300.MapViewer
             }
         }
 
+        /// <summary>
+        /// Overrides the original OnPaint method, and adds the map to it.
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);

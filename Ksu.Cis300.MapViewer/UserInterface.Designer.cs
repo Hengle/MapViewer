@@ -59,6 +59,7 @@
             this.uxOpenMap.Name = "uxOpenMap";
             this.uxOpenMap.Size = new System.Drawing.Size(83, 24);
             this.uxOpenMap.Text = "Open Map";
+            this.uxOpenMap.Click += new System.EventHandler(this.uxOpenMap_Click);
             // 
             // uxZoomIn
             // 
@@ -68,6 +69,7 @@
             this.uxZoomIn.Name = "uxZoomIn";
             this.uxZoomIn.Size = new System.Drawing.Size(69, 24);
             this.uxZoomIn.Text = "Zoom In";
+            this.uxZoomIn.Click += new System.EventHandler(this.uxZoomIn_Click);
             // 
             // uxZoomOut
             // 
@@ -77,6 +79,7 @@
             this.uxZoomOut.Name = "uxZoomOut";
             this.uxZoomOut.Size = new System.Drawing.Size(81, 24);
             this.uxZoomOut.Text = "Zoom Out";
+            this.uxZoomOut.Click += new System.EventHandler(this.uxZoomOut_Click);
             // 
             // uxMapContainer
             // 
@@ -91,14 +94,14 @@
             // 
             this.uxOpenDialog.Filter = "CSV files|*.csv|All Files|*.*";
             // 
-            // Form1
+            // UserInterface
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(553, 476);
             this.Controls.Add(this.uxMapContainer);
             this.Controls.Add(this.uxButtonBar);
-            this.Name = "Form1";
+            this.Name = "UserInterface";
             this.Text = "Map Viewer";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.uxButtonBar.ResumeLayout(false);
