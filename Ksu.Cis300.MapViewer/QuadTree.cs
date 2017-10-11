@@ -106,6 +106,12 @@ namespace Ksu.Cis300.MapViewer
             }
         }
 
+        /// <summary>
+        /// Contructs a QuadTree node.
+        /// </summary>
+        /// <param name="segments">List of street segments.</param>
+        /// <param name="area">Area you're drawing in.</param>
+        /// <param name="height">HEight of tree to be constructed.</param>
         public QuadTree(List<StreetSegment> segments, RectangleF area, int height)
         {
             if(height == 0)
@@ -121,14 +127,39 @@ namespace Ksu.Cis300.MapViewer
                 List<StreetSegment> sw = null;
                 List<StreetSegment> se = null;
                 List<StreetSegment> ne = null;
-                List<StreetSegment> all = null;
-                SplitNorthSouth(segments, y, north, south);
+                List<StreetSegment> invis = null;
+                SplitHeights(segments, height, _streets, invis);
+                SplitNorthSouth(_streets, y, north, south);
                 SplitEastWest(north, x, ne, nw);
                 SplitEastWest(south, x, se, sw);
-                height = height - 1;
-                _southeastChild = new QuadTree(se, new RectangleF(area.Left, area.Top, area.Width, area.Height) , height);
-                _southwestChild = new QuadTree;
+                _southeastChild = new QuadTree(se, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
+                _southwestChild = new QuadTree(sw, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
+                _northeastChild = new QuadTree(ne, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
+                _northwestChild = new QuadTree(nw, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
+            }
+        }
 
+
+        /// <summary>
+        /// Draws the contents of the tree. Gives each quadrant something.
+        /// </summary>
+        /// <param name="g">Graphics being used to draw.</param>
+        /// <param name="sf">Scale Factor to make the coordinates map coordinates.</param>
+        /// <param name="maxDepth">Max of tree nodes to be drawn.</param>
+        public void Draw(Graphics g, int sf, int maxDepth)
+        {
+            RectangleF area = new RectangleF(g.ClipBounds.X / sf, g.ClipBounds.Y / sf, g.ClipBounds.Width / sf, g.ClipBounds.Height / sf);
+            if (area.IntersectsWith(_bounds)){
+                foreach(StreetSegment street in _streets){
+                    street.Draw(g, sf);
+                    if(maxDepth > 0)
+                    {
+                        _northeastChild.Draw(g, sf, maxDepth - 1);
+                        _northwestChild.Draw(g, sf, maxDepth - 1);
+                        _southeastChild.Draw(g, sf, maxDepth - 1);
+                        _southwestChild.Draw(g, sf, maxDepth - 1);
+                    }
+                }
             }
         }
     }
