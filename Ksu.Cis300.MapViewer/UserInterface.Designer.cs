@@ -83,6 +83,9 @@
             // 
             // uxMapContainer
             // 
+            this.uxMapContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.uxMapContainer.AutoScroll = true;
             this.uxMapContainer.Location = new System.Drawing.Point(0, 30);
             this.uxMapContainer.MinimumSize = new System.Drawing.Size(246, 171);

@@ -16,8 +16,30 @@ namespace Ksu.Cis300.MapViewer
         private int _scale;
         private int _zoom = 0;
         private QuadTree uxMap;
-        public bool canZoomIn;
-        public bool canZoomOut;
+
+        public bool canZoomOut()
+        {
+            if (_zoom > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool canZoomIn()
+        {
+            if (_zoom < _maxZoom)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Constructor that creates a map. Essentially, as long as the streets are inside the bounds porvided, it
@@ -29,24 +51,22 @@ namespace Ksu.Cis300.MapViewer
         public Map(List<StreetSegment> streets, RectangleF bounds, int sf)
         {
             int count = 0;
-            try {
-                foreach (StreetSegment street in streets)
-                {
-                    if (isWithinBounds(street.Start, bounds) && isWithinBounds(street.End, bounds))
-                    {
-                        InitializeComponent();
-                        uxMap = new QuadTree(streets, bounds, _maxZoom);
-                        _scale = sf;
-                        Size size = new Size(Convert.ToInt32(bounds.Width) * sf, Convert.ToInt32(bounds.Height )* sf);
-                        Size = size;
-                    }
-                    count++;
-                }
-            } catch(ArgumentException ae)
+
+            foreach (StreetSegment street in streets)
             {
-                MessageBox.Show("Street " + count + "is not within the given bounds." + ae);
+                if (!isWithinBounds(street.Start, bounds) || !isWithinBounds(street.End, bounds))
+                {
+                    throw new ArgumentException("Street " + count + " is not within the given bounds.");
+                }
+                count++;
             }
-            
+
+            InitializeComponent();
+            uxMap = new QuadTree(streets, bounds, _maxZoom);
+            _scale = sf;
+            Size size = new Size(Convert.ToInt32(bounds.Width*sf), Convert.ToInt32(bounds.Height* sf));
+            Size = size;
+
         }
 
         /// <summary>
@@ -57,11 +77,14 @@ namespace Ksu.Cis300.MapViewer
         /// <returns></returns>
         private static bool isWithinBounds(PointF point, RectangleF area)
         {
-            if(point.X >= area.Left && point.X <= area.Right && point.Y <= area.Top && point.Y >= area.Bottom)
+            if (point.X >= area.Left && point.X <= area.Right && point.Y >= area.Top && point.Y <= area.Bottom)
             {
                 return true;
             }
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -69,7 +92,7 @@ namespace Ksu.Cis300.MapViewer
         /// </summary>
         public void ZoomIn()
         {
-            if (canZoomIn)
+            if (canZoomIn())
             {
                 _zoom++;
                 _scale = _scale * 2;
@@ -83,7 +106,7 @@ namespace Ksu.Cis300.MapViewer
         /// </summary>
         public void ZoomOut()
         {
-            if (canZoomOut)
+            if (canZoomOut())
             {
                 _zoom--;
                 _scale = _scale / 2;

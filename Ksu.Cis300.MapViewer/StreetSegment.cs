@@ -51,7 +51,7 @@ namespace Ksu.Cis300.MapViewer
             }
         }
 
-        public StreetSegment(PointF s, PointF e, Color c, int vl, float w)
+        public StreetSegment(PointF s, PointF e, Color c, float w, int vl)
         {
             _start = s;
             _end = e;

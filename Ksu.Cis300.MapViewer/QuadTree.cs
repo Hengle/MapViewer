@@ -9,12 +9,12 @@ namespace Ksu.Cis300.MapViewer
 {
     class QuadTree
     {
-        private QuadTree _southeastChild;
-        private QuadTree _southwestChild;
-        private QuadTree _northeastChild;
-        private QuadTree _northwestChild;
-        private RectangleF _bounds;
-        private List<StreetSegment> _streets;
+        private QuadTree _southeastChild = null;
+        private QuadTree _southwestChild = null;
+        private QuadTree _northeastChild = null;
+        private QuadTree _northwestChild = null;
+        private RectangleF _bounds = new RectangleF();
+        private List<StreetSegment> _streets = new List<StreetSegment>();
 
         /// <summary>
         /// Organizes Street Segments by visibility. 
@@ -26,14 +26,14 @@ namespace Ksu.Cis300.MapViewer
         private static void SplitHeights(List<StreetSegment> split, int height, List<StreetSegment> visible,
             List<StreetSegment> invisible)
         {
-            for(int i = 0; i < split.Count; i++)
+            foreach(StreetSegment street in split)
             {
-                if(split[i].VisibleLevels > height)
+                if(street.VisibleLevels > height)
                 {
-                    visible.Add(split[i]);
+                    visible.Add(street);
                 } else
                 {
-                    invisible.Add(split[i]);
+                    invisible.Add(street);
                 }
             }
         }
@@ -49,24 +49,32 @@ namespace Ksu.Cis300.MapViewer
         private static void SplitEastWest(List<StreetSegment> split, float x, List<StreetSegment> east,
             List<StreetSegment> west)
         {
-            for(int i = 0; i < split.Count; i++)
+            foreach(StreetSegment street in split)
             {
-                if(split[i].Start.X < x && split[i].End.X < x)
+                if(street.Start.X <= x && street.End.X <= x)
                 {
-                    west.Add(split[i]);
-                } else if(split[i].Start.X > x && split[i].End.X > x)
+                    west.Add(street);
+                } else if(street.Start.X > x && street.End.X > x)
                 {
-                    east.Add(split[i]);
+                    east.Add(street);
                 } else
                 {
-                    StreetSegment firstHalf = split[i];
-                    StreetSegment secondHalf = split[i];
-                    float y = (((firstHalf.End.Y - firstHalf.Start.Y) * (x - firstHalf.Start.X)) / (firstHalf.End.X - firstHalf.Start.X))
-                        + firstHalf.Start.Y;
+                    StreetSegment firstHalf = street;
+                    StreetSegment secondHalf = street;
+                    float y = (((street.End.Y - street.Start.Y) * (x - street.Start.X)) / (street.End.X - street.Start.X))
+                        + street.Start.Y;
                     firstHalf.Start = new PointF(x, y);
                     secondHalf.End = new PointF(x, y);
-                    west.Add(secondHalf);
-                    east.Add(firstHalf);
+                    if (firstHalf.End.X > x)
+                    {
+                        east.Add(firstHalf);
+                        west.Add(secondHalf);
+                    }
+                    else
+                    {
+                        east.Add(secondHalf);
+                        west.Add(firstHalf);
+                    }
                 }
             }
         }
@@ -82,26 +90,34 @@ namespace Ksu.Cis300.MapViewer
         private static void SplitNorthSouth(List<StreetSegment> split, float y, List<StreetSegment> north,
             List<StreetSegment> south)
         {
-            for (int i = 0; i < split.Count; i++)
+            foreach(StreetSegment street in split)
             {
-                if (split[i].Start.Y < y && split[i].End.Y < y)
+                if (street.Start.Y <= y && street.End.Y <= y)
                 {
-                    south.Add(split[i]);
+                    north.Add(street);
                 }
-                else if (split[i].Start.Y > y && split[i].End.Y > y)
+                else if (street.Start.Y > y && street.End.Y > y)
                 {
-                    north.Add(split[i]);
+                    south.Add(street);
                 }
                 else
                 {
-                    StreetSegment firstHalf = split[i];
-                    StreetSegment secondHalf = split[i];
-                    float x = (((firstHalf.End.X - firstHalf.Start.X) * (y - firstHalf.Start.Y)) / (firstHalf.End.Y - firstHalf.Start.Y))
-                        + firstHalf.Start.X;
-                    firstHalf.Start = new PointF(x, y);
-                    secondHalf.End = new PointF(x, y);
-                    south.Add(secondHalf);
-                    north.Add(firstHalf);
+                    StreetSegment firstHalf = street;
+                    StreetSegment secondHalf = street;
+                    float x = (((street.End.X - street.Start.X) * (y - street.Start.Y)) / (street.End.Y - street.Start.Y))
+                        + street.Start.X;
+                    firstHalf.End = new PointF(x, y);
+                    secondHalf.Start = new PointF(x, y);
+                    if (firstHalf.End.Y > y)
+                    {
+                        south.Add(firstHalf);
+                        north.Add(secondHalf);
+                    }
+                    else
+                    {
+                        south.Add(secondHalf);
+                        north.Add(firstHalf);
+                    }
                 }
             }
         }
@@ -114,28 +130,38 @@ namespace Ksu.Cis300.MapViewer
         /// <param name="height">HEight of tree to be constructed.</param>
         public QuadTree(List<StreetSegment> segments, RectangleF area, int height)
         {
-            if(height == 0)
+            _bounds = area;
+
+            if (height == 0)
             {
                 _streets = segments;
-            } else
+            }
+            else
             {
+                List<StreetSegment> northSide = new List<StreetSegment>();
+                List<StreetSegment> southSide = new List<StreetSegment>();
+                List<StreetSegment> nw = new List<StreetSegment>();
+                List<StreetSegment> ne = new List<StreetSegment>();
+                List<StreetSegment> sw = new List<StreetSegment>();
+                List<StreetSegment> se = new List<StreetSegment>();
+                List<StreetSegment> nonVisible = new List<StreetSegment>();
+                List<StreetSegment> visible = new List<StreetSegment>();
                 float x = (area.Width / 2) + area.Left;
-                float y = (area.Height / 2) - area.Top; //change to -area.Top later if this doesnt work.
-                List<StreetSegment> north = null;
-                List<StreetSegment> south = null;
-                List<StreetSegment> nw = null;
-                List<StreetSegment> sw = null;
-                List<StreetSegment> se = null;
-                List<StreetSegment> ne = null;
-                List<StreetSegment> invis = null;
-                SplitHeights(segments, height, _streets, invis);
-                SplitNorthSouth(_streets, y, north, south);
-                SplitEastWest(north, x, ne, nw);
-                SplitEastWest(south, x, se, sw);
-                _southeastChild = new QuadTree(se, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
-                _southwestChild = new QuadTree(sw, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
-                _northeastChild = new QuadTree(ne, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
-                _northwestChild = new QuadTree(nw, new RectangleF(area.Left, area.Top, area.Width, area.Height), height - 1);
+                float y = (area.Height / 2) + area.Top;
+
+                SplitHeights(segments, height, visible, nonVisible);
+                _streets = visible;
+                SplitNorthSouth(nonVisible, y, northSide, southSide);
+                SplitEastWest(northSide, x, ne, nw);
+                SplitEastWest(southSide, x, se, sw);
+
+                float width = area.Width / 2;
+                float length = area.Height / 2;
+                height--;
+                _northeastChild = new QuadTree(ne, new RectangleF(x, area.Top, width, length), height);
+                _northwestChild = new QuadTree(nw, new RectangleF(area.Left, area.Top, width, length), height);
+                _southeastChild = new QuadTree(se, new RectangleF(x, y, width, length), height);
+                _southwestChild = new QuadTree(sw, new RectangleF(area.Left, y, width, length), height);
             }
         }
 
@@ -148,18 +174,22 @@ namespace Ksu.Cis300.MapViewer
         /// <param name="maxDepth">Max of tree nodes to be drawn.</param>
         public void Draw(Graphics g, int sf, int maxDepth)
         {
+
             RectangleF area = new RectangleF(g.ClipBounds.X / sf, g.ClipBounds.Y / sf, g.ClipBounds.Width / sf, g.ClipBounds.Height / sf);
             if (area.IntersectsWith(_bounds)){
-                foreach(StreetSegment street in _streets){
+                foreach (StreetSegment street in _streets)
+                {
                     street.Draw(g, sf);
-                    if(maxDepth > 0)
-                    {
-                        _northeastChild.Draw(g, sf, maxDepth - 1);
-                        _northwestChild.Draw(g, sf, maxDepth - 1);
-                        _southeastChild.Draw(g, sf, maxDepth - 1);
-                        _southwestChild.Draw(g, sf, maxDepth - 1);
-                    }
                 }
+                if(maxDepth > 0)
+                {
+                    maxDepth--;
+                    _northeastChild.Draw(g, sf, maxDepth);
+                    _northwestChild.Draw(g, sf, maxDepth);
+                    _southeastChild.Draw(g, sf, maxDepth);
+                    _southwestChild.Draw(g, sf, maxDepth);
+                }
+                
             }
         }
     }
